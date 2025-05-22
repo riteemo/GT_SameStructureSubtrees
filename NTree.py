@@ -5,6 +5,65 @@ from collections import deque
 from utils import *
 
 
+def _filter_by_structure(
+        pattern_edges: List[Tuple[int, int]],
+        G_main: nx.Graph,
+        matches: List[List[int]],
+        G_pattern: nx.Graph
+) -> List[List[int]]:
+    """
+    Фильтрует найденные подграфы, оставляя только те, в которых структура (иерархия) совпадает с паттерном.
+
+    :param pattern_edges: список ребер в паттерне (как parent -> child)
+    :param G_main: граф основного дерева
+    :param matches: найденные совпадения (каждое — список узлов из G_main)
+    :param G_pattern: граф паттерна
+    :return: отфильтрованный список совпадений
+    """
+    valid_matches = []
+
+    for match_nodes in matches:
+        if len(match_nodes) != G_pattern.number_of_nodes():
+            continue  # по размеру не совпадает
+
+        # сопоставим вершины паттерна и основного дерева по индексам
+        pattern_nodes = list(G_pattern.nodes())
+        mapping = dict(zip(pattern_nodes, match_nodes))
+        inverse_mapping = {v: k for k, v in mapping.items()}
+
+        is_valid = True
+        for parent_p, child_p in pattern_edges:
+            parent_m = mapping[parent_p]
+            child_m = mapping[child_p]
+
+            # 1. Проверка существования ребра в основном графе
+            if not G_main.has_edge(parent_m, child_m):
+                is_valid = False
+                break
+
+            # 2. Проверка, что parent действительно ближе к корню, чем child
+            # Выполним BFS от parent_m и убедимся, что мы можем дойти до child_m
+            visited = set()
+            queue = [parent_m]
+            found = False
+            while queue:
+                node = queue.pop(0)
+                if node == child_m:
+                    found = True
+                    break
+                if node in visited:
+                    continue
+                visited.add(node)
+                queue.extend([n for n in G_main.neighbors(node) if n not in visited])
+            if not found:
+                is_valid = False
+                break
+
+        if is_valid:
+            valid_matches.append(match_nodes)
+
+    return valid_matches
+
 # класс для описания дерева
 class NTree:
     #@timer
@@ -55,4 +114,6 @@ class NTree:
                 unique_results.add(subtree_nodes)
                 filtered_results.append(list(subtree_nodes))
 
-        return filtered_results
+        return _filter_by_structure(pattern_edges, G_main, filtered_results, G_pattern)
+
+

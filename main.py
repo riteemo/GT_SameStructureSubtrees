@@ -13,7 +13,7 @@ def input_edges():
         edges.append((u, v))
     return edges
 
-# Дано бинарное дерево. Найти поддерево, не включающее ни одну из заданных вершин.
+# Дано н-арное дерево. Найти все поддеревья, структура которых совпадает с заданной.
 def main():
     generator = TreeGenerator() # объект генерации дерева
     file_manager = FileManager() # объект для работы с файлами
@@ -74,46 +74,33 @@ def main():
 
 
             elif choice == "4":
-
                 if tree is None:
                     print("Сначала загрузите или сгенерируйте дерево.")
-
                     continue
 
                 print("Введите количество ребер паттерна (маленького дерева для поиска):")
-
                 try:
-
                     m = int(input())
-
                     if m < 0:
                         raise ValueError("Количество ребер не может быть отрицательным")
-
                     print("Введите ребра паттерна (каждое ребро — два числа через пробел):")
-
                     pattern_edges = []
 
                     for _ in range(m):
                         u, v = map(int, input().split())
-
                         pattern_edges.append((u, v))
-
                     matches = tree.find_subtrees_by_structure(pattern_edges)
 
                     if not matches:
-
                         print("Поддеревья с такой структурой не найдены.")
 
                     else:
-
                         print(f"Найдено {len(matches)} поддеревьев с такой структурой:")
-
                         for i, subtree_nodes in enumerate(matches, 1):
                             print(f"{i}: вершины {sorted(subtree_nodes)}")
 
 
                 except ValueError as e:
-
                     print(f"Ошибка ввода: {e}")
 
 
