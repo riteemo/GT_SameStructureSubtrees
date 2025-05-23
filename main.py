@@ -63,7 +63,6 @@ def main():
                 except Exception as e:
                     print(f"Error loading: {e}")
 
-
             elif choice == "3":
                 if tree:
                     print("Full tree: ")
@@ -71,38 +70,39 @@ def main():
                 else:
                     print("Firstly load or generate the tree")
 
-
-
             elif choice == "4":
                 if tree is None:
-                    print("Сначала загрузите или сгенерируйте дерево.")
+                    print("Firstly load or generate the tree")
                     continue
-
-                print("Введите количество ребер паттерна (маленького дерева для поиска):")
+                print("The pattern should be a small tree with vertices numbered from 0 to number of edges inclusive")
+                print("Enter the number of edges of the pattern: ")
                 try:
                     m = int(input())
                     if m < 0:
-                        raise ValueError("Количество ребер не может быть отрицательным")
-                    print("Введите ребра паттерна (каждое ребро — два числа через пробел):")
+                        raise ValueError("The number of edges must be positive")
+
+                    pattern_size = m + 1
+                    print(f"Enter the edges of the pattern (each edge is two numbers from 0 to {pattern_size - 1} separated by a space):")
                     pattern_edges = []
 
                     for _ in range(m):
                         u, v = map(int, input().split())
+                        if not (0 <= u < pattern_size) or not (0 <= v < pattern_size):
+                            raise ValueError(f"The vertex {u} or {v} extends beyond the boundaries of the pattern (0..{pattern_size - 1})")
+
                         pattern_edges.append((u, v))
                     matches = tree.find_subtrees_by_structure(pattern_edges)
 
                     if not matches:
-                        print("Поддеревья с такой структурой не найдены.")
+                        print("No subtrees with this structure were found")
 
                     else:
-                        print(f"Найдено {len(matches)} поддеревьев с такой структурой:")
-                        for i, subtree_nodes in enumerate(matches, 1):
-                            print(f"{i}: вершины {sorted(subtree_nodes)}")
-
-
+                        #print(f"Found {len(matches)} of subtrees with this structure:")
+                        #for i, subtree_nodes in enumerate(matches, 1):
+                            #print(f"{i}: vertices {sorted(subtree_nodes)}")
+                        visualizer.visualize(tree.graph, matches)
                 except ValueError as e:
-                    print(f"Ошибка ввода: {e}")
-
+                    print(f"Wrong input: {e}")
 
             elif choice == "5":
                 if edges is not None:

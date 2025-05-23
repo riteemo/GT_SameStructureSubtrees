@@ -1,7 +1,6 @@
 from typing import List, Set, Tuple
 import networkx as nx
 from networkx.algorithms import isomorphism
-from collections import deque
 from utils import *
 
 
@@ -13,12 +12,10 @@ def _filter_by_structure(
 ) -> List[List[int]]:
     """
     Фильтрует найденные подграфы, оставляя только те, в которых структура (иерархия) совпадает с паттерном.
-
     :param pattern_edges: список ребер в паттерне (как parent -> child)
     :param G_main: граф основного дерева
     :param matches: найденные совпадения (каждое — список узлов из G_main)
     :param G_pattern: граф паттерна
-    :return: отфильтрованный список совпадений
     """
     valid_matches = []
 
@@ -84,6 +81,8 @@ class NTree:
             G.add_edge(u, v)
         return G
 
+    @timer
+    @memory_timer
     def find_subtrees_by_structure(self, pattern_edges: List[Tuple[int, int]]) -> List[List[int]]:
         """
         Ищет все поддеревья в текущем дереве, структурно совпадающие с паттерном.
@@ -97,7 +96,6 @@ class NTree:
 
         GM = isomorphism.GraphMatcher(G_main, G_pattern,
                                       node_match=lambda n1, n2: True)  # игнорируем метки узлов
-
         results = []
         for subgraph_mapping in GM.subgraph_isomorphisms_iter():
             # subgraph_mapping: dict {node_main: node_pattern}
